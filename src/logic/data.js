@@ -1,10 +1,30 @@
-/* Demo data and pure helpers for the Pulse prototype (Kilbride Group). */
+/* Demo data and pure helpers for the Pulse prototype (Walsh Labour Operations demo).
+   Client-specific records live in src/demo/walshData.ts; this file re-labels the template. */
+import { WORKERS as WX, CLIENTS as CX, SITES as SX } from "../demo/walshData";
+import { getDemo } from "../demo/store";
+import { weeklyTotals, certAlerts, eur } from "../demo/selectors";
+/* Live KPI values: read from the demo store so the band matches every module. */
+const WALSH_LIVE = {
+  ready: () => eur(weeklyTotals(getDemo()).ready),
+  held: () => { const h = weeklyTotals(getDemo()).held; return h ? eur(h) + " held" : "nothing held"; },
+  heldDir: () => weeklyTotals(getDemo()).held ? "down" : "up",
+  cleared: () => { const c = certAlerts(getDemo()); return c.clear.length + " / " + (c.clear.length + c.held.length); },
+  heldText: () => { const n = certAlerts(getDemo()).held.length; return n ? n + " on compliance hold" : "none on hold"; },
+  clearedDir: () => certAlerts(getDemo()).held.length ? "down" : "up",
+  approved: () => weeklyTotals(getDemo()).approved + "h"
+};
 
 const INK="var(--ink)", BODY="var(--body)", DIM="var(--dim)", FAINT="var(--faint)";
 const LIME="var(--accent)", GREEN="var(--ok)", AMBER="var(--warn)", RED="var(--bad)", NEUTRAL="var(--neutral)";
 const MONO="var(--mono)";
 
 const ICONS = {
+  navOps:"M12 21s6.5-5.6 6.5-11a6.5 6.5 0 1 0-13 0C5.5 15.4 12 21 12 21Z M9.4 10.2h5.2 M12 7.6v5.2",
+  navCrew:"M9 12a3.2 3.2 0 1 0 0-6.4A3.2 3.2 0 0 0 9 12Z M16.5 12.5a2.6 2.6 0 1 0 0-5.2 2.6 2.6 0 0 0 0 5.2Z M2.6 19.6c.8-2.8 3.2-4.4 6.4-4.4s5.6 1.6 6.4 4.4 M17 15.4c2.2.4 3.7 1.8 4.3 4.2",
+  navTime:"M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z M12 7.2V12l3.2 2",
+  navComp:"M12 3.2 19.5 6v6.1c0 4-3.1 6.9-7.5 8.3-4.4-1.4-7.5-4.3-7.5-8.3V6L12 3.2Z M9.2 12.2l2 2 3.6-3.7",
+  navClients:"M4.5 20V6.4A1.4 1.4 0 0 1 5.9 5h6.2a1.4 1.4 0 0 1 1.4 1.4V20 M13.5 10.5h4.6A1.4 1.4 0 0 1 19.5 12v8 M3 20h18 M7.5 8.5h2.5 M7.5 12h2.5 M7.5 15.5h2.5",
+  navFinance:"M16.8 6.6A6.6 6.6 0 0 0 7 12a6.6 6.6 0 0 0 9.8 5.4 M4.6 10.4h8.4 M4.6 13.6h8.4",
   navHome:"M12 3.2 3.6 9.1v10a1.5 1.5 0 0 0 1.5 1.5h13.8a1.5 1.5 0 0 0 1.5-1.5v-10L12 3.2Z M8.9 13.1h2l1-2.6 1.5 5 1.1-2.4h1.6",
   navAgents:"M12 2.4v2.3 M12 2.4a.9.9 0 1 0 0-.02 M8.2 6.5h7.6A2.2 2.2 0 0 1 18 8.7v5.1a2.2 2.2 0 0 1-2.2 2.2H8.2A2.2 2.2 0 0 1 6 13.8V8.7a2.2 2.2 0 0 1 2.2-2.2Z M9.9 10.6v1.4 M14.1 10.6v1.4 M6 10h-1.9 M18 10h1.9 M9.2 18.6h5.6 M9.2 21.2h5.6",
   navDash:"M4 5.6h7.2v5.1H4V5.6Z M13.6 5.6H20v8.6h-6.4V5.6Z M4 13.1h7.2v5.3H4v-5.3Z M13.6 16.6H20v1.8h-6.4v-1.8Z",
@@ -37,83 +57,92 @@ const ICONS = {
 
 /* Ontology stays first and is never removed (PulseLogic enforces this too). */
 const REC_SECTIONS = [
-  {id:"ontology", label:"Ontology", blurb:"How every record connects: entities, predicates and the paths between them."},
-  {id:"files", label:"Files", blurb:"Documents, contracts and certificates — indexed where Helios can read them."},
-  {id:"contacts", label:"Contacts", blurb:"Every person the business deals with, staff and external."}
+  {id:"ontology", label:"Ontology", blurb:"How every record connects: client, contract, site, assignment, worker, timesheet, invoice."},
+  {id:"files", label:"Files", blurb:"Timesheet imports, invoice drafts, certificates and client instructions (demo metadata)."},
+  {id:"contacts", label:"Contacts", blurb:"Paul, Elaine, the 17 subcontractors and placeholder client contacts."},
+  {id:"entities", label:"Entities", blurb:"Searchable lists of every record type, with linked detail drawers."},
+  {id:"relationships", label:"Relationships", blurb:"Follow one record through every entity it touches."},
+  {id:"imports", label:"Imports", blurb:"Excel timesheet import preview and Base44 legacy mapping (planned)."}
 ];
 
 const CONTACTS = [
-  ["Aoife Nolan","Accounts manager","aoife@kilbridegroup.ie","Kilbride Group","staff","var(--accent)"],
-  ["Séamus Byrne","Senior installer","seamus@kilbridegroup.ie","Kilbride Group","staff","#9fd6f0"],
-  ["Tom Walsh","Operations lead","tom@kilbridegroup.ie","Kilbride Group","staff","#e6c78a"],
-  ["Niamh Cronin","Trade counter","niamh@kilbridegroup.ie","Kilbride Group","staff","#c8b4f0"],
-  ["Dermot Casey","Buyer","dermot@caseybuilders.ie","Casey Builders","customer","#9fd6f0"],
-  ["Liam Dunne","Owner","liam@dunneandsons.ie","Dunne & Sons Ltd","on stop","#e2a08c"],
-  ["Máire Fitzgerald","Director","maire@fitzheating.ie","Fitzgerald Heating","watch","#e6c78a"],
-  ["Paul Ó Riain","Site foreman","paul@oriain.ie","Ó Riain, Glanmire","customer","#a8e0c0"],
-  ["Cathal Moore","Account manager","cathal@munsterplumbing.ie","Munster Plumbing","supplier","#c8b4f0"]
-];
+  ["Paul Walsh","Owner / operator","paul@walsh-ops.example","Walsh Labour Operations","owner","#d6b48a"],
+  ["Elaine Walsh","Invoicing & administration","elaine@walsh-ops.example","Walsh Labour Operations","admin","#9fc7e6"]
+].concat(WX.map(w => [w.name, w.trade, w.email, w.siteId ? SX.find(x => x.id === w.siteId).name : "Available", w.siteId ? "subcontractor" : "available", w.tint]))
+ .concat(CX.flatMap(c => c.contacts.map(k => [k.name, k.role, k.email, c.name, "client", "#c8d0dc"])));
 
 const FILE_TREE = [
-  {type:"folder", id:"f-org", name:"Organisations", depth:0},
-  {type:"file", id:"fl-1", name:"Casey Builders — framework 2026.pdf", depth:1, parent:"f-org", indexed:true,
-   path:"Organisations / Casey Builders", title:"Casey Builders — framework 2026",
-   facts:[["TYPE","PDF · 6 pages"],["ADDED","12 Jan 2026"],["INDEXED","All 6 pages"],["OWNER","Aoife Nolan"]],
-   body:["The framework sets the discount tiers for 2026 and the payment terms Casey Builders trade on. Tier two applies from €40k of annual spend, which they passed in August.",
-     "Pricing is fixed to the June supplier agreement, so a change on the Munster side flows through here rather than being renegotiated separately.",
-     "Termination requires sixty days' notice on either side. Nothing in the document blocks putting the account on stop for non-payment."],
-   links:[["Casey Builders","org"],["Dermot Casey","person"],["PO-4471","order"]]},
-  {type:"file", id:"fl-2", name:"Dunne & Sons — credit application.pdf", depth:1, parent:"f-org", indexed:true,
-   path:"Organisations / Dunne & Sons Ltd", title:"Dunne & Sons — credit application",
-   facts:[["TYPE","PDF · 4 pages"],["ADDED","3 Mar 2011"],["INDEXED","All 4 pages"],["OWNER","Aoife Nolan"]],
-   body:["The original 2011 application, signed by Liam Dunne, setting a €20,000 limit against thirty-day terms.",
-     "Days-to-pay ran at twelve for most of that period and moved to seventy-four after May 2026, which is what put the account on stop.",
-     "The personal guarantee in section four is still in force and has never been called on."],
-   links:[["Dunne & Sons Ltd","org"],["Liam Dunne","person"],["INV-10428","invoice"]]},
+  {type:"folder", id:"f-ts", name:"Timesheets", depth:0},
+  {type:"file", id:"fl-1", name:"Westbridge template · wk 46.xlsx", depth:1, parent:"f-ts", indexed:true,
+   path:"Timesheets / Imports", title:"Westbridge timesheet template · week 46",
+   facts:[["TYPE","XLSX · 2 sheets (demo)"],["ADDED","Fri 13 Nov 15:20"],["ROWS","6 rows · 208h"],["OWNER","Elaine Walsh"]],
+   body:["Client template covering Harbour Road Upgrade and Navan Retail Park: 5 workers, 200h after the duplicate row was rejected.",
+     "Row 4 repeated Ryan McGrath's Wednesday 8h (TS-1097). Timesheet Collector flagged it; it is excluded from every total.",
+     "Import preview only. No live connection to the spreadsheet."],
+   links:[["Westbridge Civil","org"],["TS-1097","timesheet"],["Ryan McGrath","person"]]},
+  {type:"file", id:"fl-2", name:"Worker app export · wk 46.csv", depth:1, parent:"f-ts", indexed:true,
+   path:"Timesheets / Imports", title:"Worker app export · week 46",
+   facts:[["TYPE","CSV (demo)"],["ADDED","Fri 13 Nov 16:30"],["ROWS","11 sheets · 390h"],["OWNER","Timesheet Collector"]],
+   body:["North Quay (195h), Ballymun (115h) and Tallaght (80h) submissions from the worker app.",
+     "Includes TS-1098: David Byrne, Fri 13 Nov, 8h at Ballymun, no client signature yet. Held at €320."],
+   links:[["TS-1098","timesheet"],["David Byrne","person"],["Morrow Industrial","org"]]},
   {type:"folder", id:"f-cert", name:"Certificates", depth:0},
-  {type:"file", id:"fl-3", name:"Séamus Byrne — gas safe 2026.pdf", depth:1, parent:"f-cert", indexed:true,
-   path:"Certificates / Installers", title:"Séamus Byrne — gas safe 2026",
-   facts:[["TYPE","PDF · 2 pages"],["EXPIRES","14 Nov 2026"],["INDEXED","Both pages"],["OWNER","Operations"]],
-   body:["Registration covers domestic boilers and commercial water heaters, valid to 14 November 2026.",
-     "The renewal reminder fires sixty days before expiry. That routine failed twice this week because Mallow yard has no contact on file."],
-   links:[["Séamus Byrne","person"],["Certificate renewal reminder","workflow"]]},
-  {type:"file", id:"fl-4", name:"Public liability — 2026.pdf", depth:1, parent:"f-cert", indexed:false,
-   path:"Certificates / Insurance", title:"Public liability — 2026",
-   facts:[["TYPE","PDF · 12 pages"],["EXPIRES","1 Apr 2027"],["INDEXED","Not indexed"],["OWNER","Operations"]],
-   body:["Cover to €6.5m across all three locations. Not indexed, so Helios cannot answer questions from it yet.",
-     "Indexing it would let the site-visits module check cover before a job is booked at a new address."],
-   links:[["Head office","location"],["Ballincollig depot","location"]]},
+  {type:"file", id:"fl-3", name:"Sean Murphy · manual handling.pdf", depth:1, parent:"f-cert", indexed:true,
+   path:"Certificates / North Quay crew", title:"Sean Murphy · manual handling",
+   facts:[["TYPE","PDF (demo metadata)"],["EXPIRED","14 Nov 2026"],["REQUIRED BY","North Quay (demo policy)"],["OWNER","Elaine Walsh"]],
+   body:["Expired on 14 November. North Quay's site policy in this demo requires a current manual-handling record before entry.",
+     "Sean stays assigned but is not cleared until an updated record is uploaded and approved. Mark Dunne is available as cover."],
+   links:[["Sean Murphy","person"],["North Quay Development","site"]]},
+  {type:"file", id:"fl-4", name:"Patrick Doyle · Safe Pass.pdf", depth:1, parent:"f-cert", indexed:true,
+   path:"Certificates / Harbour Road crew", title:"Patrick Doyle · Safe Pass",
+   facts:[["TYPE","PDF (demo metadata)"],["EXPIRES","20 Nov 2026"],["STATUS","Valid · 4 days left"],["OWNER","Elaine Walsh"]],
+   body:["Valid today, expires Friday 20 November. Safe Pass renewal is generally every four years.",
+     "Renewal reminder drafted by Compliance Monitor. The demo does not verify anything with the issuer."],
+   links:[["Patrick Doyle","person"],["Harbour Road Upgrade","site"]]},
   {type:"folder", id:"f-fin", name:"Finance", depth:0},
-  {type:"file", id:"fl-5", name:"INV-10428.pdf", depth:1, parent:"f-fin", indexed:true,
-   path:"Finance / Invoices", title:"INV-10428",
-   facts:[["TYPE","PDF · 1 page"],["VALUE","€28,410"],["AGE","74 days"],["OWNER","Aoife Nolan"]],
-   body:["The oldest unpaid invoice on the ledger and the reason Dunne & Sons is on stop.",
-     "Two reminders have gone out. The third is drafted and waiting on the finance manager inside the chase workflow."],
-   links:[["Dunne & Sons Ltd","org"],["Chase unpaid invoices","workflow"]]},
-  {type:"file", id:"fl-6", name:"Month-end close — August.xlsx", depth:1, parent:"f-fin", indexed:false,
-   path:"Finance / Close", title:"Month-end close — August",
-   facts:[["TYPE","XLSX · 9 sheets"],["ADDED","1 Sep 2026"],["INDEXED","Not indexed"],["OWNER","Aoife Nolan"]],
-   body:["The working file behind the August close. Cash collected came in at €368k against €358k in July.",
-     "Spreadsheets are stored but not indexed by default — the numbers Helios quotes come from the ledger, not from here."],
-   links:[["Finance","area"],["Month-end close","workflow"]]}
+  {type:"file", id:"fl-5", name:"INV-2026-103.pdf", depth:1, parent:"f-fin", indexed:true,
+   path:"Finance / Invoices", title:"INV-2026-103 · Westbridge Civil",
+   facts:[["TYPE","PDF (demo)"],["VALUE","€7,760"],["OVERDUE","31 days"],["OWNER","Elaine Walsh"]],
+   body:["Week 37 (7–13 Sep 2026). Issued 16 Sep, due 16 Oct. The only overdue invoice on the ledger.",
+     "Separate from this week's €7,760 Westbridge draft; the matching amount is a coincidence. Reminder drafted, waiting for Paul."],
+   links:[["Westbridge Civil","org"],["Collections Assistant","agent"]]},
+  {type:"file", id:"fl-6", name:"Accountant pack · October.xlsx", depth:1, parent:"f-fin", indexed:false,
+   path:"Finance / Accountant", title:"Accountant pack · October",
+   facts:[["TYPE","XLSX (demo)"],["SENT","9 Nov 2026"],["INDEXED","Not indexed"],["OWNER","Elaine Walsh"]],
+   body:["The spreadsheet handoff the accountant receives today. Their accounting package is not confirmed.",
+     "Pulse would produce the same file from approved hours; it does not replace the accountant's ledger."],
+   links:[["Elaine Walsh","person"]]},
+  {type:"folder", id:"f-cli", name:"Client instructions", depth:0},
+  {type:"file", id:"fl-7", name:"North Quay · site rules.pdf", depth:1, parent:"f-cli", indexed:true,
+   path:"Client instructions / Castleview", title:"North Quay · site rules",
+   facts:[["TYPE","PDF (demo)"],["CLIENT","Castleview Residential"],["UPDATED","2 Nov 2026"],["OWNER","Paul Walsh"]],
+   body:["Sign in at the hoarding gate. Current manual-handling record required before entry (mock client-site policy).",
+     "Weekly hours signed by the site manager on Friday afternoons."],
+   links:[["North Quay Development","site"],["Castleview Residential","org"]]},
+  {type:"file", id:"fl-8", name:"Base44 dashboard export.json", depth:1, parent:"f-cli", indexed:false,
+   path:"Legacy / Base44", title:"Base44 dashboard export (planned)",
+   facts:[["TYPE","JSON (planned)"],["STATUS","Not yet exported"],["INDEXED","No"],["OWNER","Paul Walsh"]],
+   body:["Paul's existing Base44 dashboards are a migration candidate. Plan: manual export, map fields, then retire.",
+     "No live connection exists."],
+   links:[["Paul Walsh","person"]]}
 ];
 
 const ONTO_NODES = [
-  ["Organisation","entity",500,300,1,"Customers and suppliers. Balances arrive from the ledger through the record spine."],
-  ["Person","entity",300,190,1,"One entity for staff and external contacts, scoped by role rather than split in two."],
-  ["Location","entity",700,190,1,"Multi-branch as a business concept: locations plus the location permission scope."],
-  ["Team","entity",250,430,1,"Teams are records, so the team scope on a grant resolves against them."],
-  ["Task","entity",690,430,1,"Work, whatever it is attached to. Queues are one permission-filtered query."],
-  ["Approval","entity",850,320,0,"A request and its steps. Each decision is written as the person who made it."],
-  ["Invoice","ledger",390,95,0,"Read through the spine — the wholesale ledger stays the source of truth."],
-  ["Order","ledger",620,95,0,"Purchase and sales orders, linked to the organisation that raised them."],
-  ["Visit","module",860,470,0,"Contributed by site-visits, with its own table, predicate and tools."],
-  ["File","entity",140,300,0,"Documents against any record. Indexed pages are what Helios can read."],
-  ["works at","predicate",395,240,0,"Person → Organisation."],
-  ["located at","predicate",605,240,0,"Organisation → Location."],
-  ["member of","predicate",360,370,0,"Person → Team."],
-  ["relates to","predicate",600,370,0,"Task → anything."],
-  ["attached to","predicate",140,372,0,"File → anything."]
+  ["Client","entity",500,300,1,"The construction or contracting business we supply labour to."],
+  ["Contract","entity",300,190,1,"Agreed client charge rate, contractor cost rate, effective dates."],
+  ["Site","entity",700,190,1,"Where the work happens. Carries its own entry rules."],
+  ["Assignment","entity",250,430,1,"Worker × site × dates. Blocked if a required document is out of date."],
+  ["Worker","entity",690,430,1,"A subcontractor on the books, paid a contractor rate."],
+  ["Timesheet","entity",850,320,0,"Hours by day, signed off by the client."],
+  ["Invoice","ledger",390,95,0,"Built only from signed-off hours."],
+  ["Payment status","ledger",620,95,0,"Open, overdue or paid."],
+  ["Certificate","module",860,470,0,"Safe Pass, manual handling, inductions, CSCS."],
+  ["Task","entity",140,300,0,"Work raised by people or agents."],
+  ["placed on","predicate",395,240,0,"Worker → Site through an Assignment."],
+  ["billed on","predicate",605,240,0,"Timesheet → Invoice."],
+  ["holds","predicate",360,370,0,"Worker → Certificate."],
+  ["raised by","predicate",600,370,0,"Task → Agent or person."],
+  ["governs","predicate",140,372,0,"Contract → Site."]
 ];
 
 const ONTO_EDGES = [
@@ -154,10 +183,10 @@ const REC_TEMPLATE_CATS = ["All","Records","Case work","Finance","Notes","Ops"];
 /* ---- admin hub ---- */
 /* ---- admin hub: 13 settings areas in five groups ---- */
 const PEOPLE = [
-  ["Aoife Nolan","Accounts manager","aoife@kilbridegroup.ie","Head office","active","Admin","2 min ago"],
-  ["Séamus Byrne","Senior installer","seamus@kilbridegroup.ie","Ballincollig","active","Standard","1 h ago"],
-  ["Tom Walsh","Operations lead","tom@kilbridegroup.ie","Head office","active","Manager","34 min ago"],
-  ["Niamh Cronin","Trade counter","niamh@kilbridegroup.ie","Ballincollig","active","Standard","3 h ago"],
+  ["Aoife Nolan","Accounts manager","aoife@walsh-ops.example","Head office","active","Admin","2 min ago"],
+  ["Séamus Byrne","Senior installer","seamus@walsh-ops.example","Ballincollig","active","Standard","1 h ago"],
+  ["Tom Walsh","Operations lead","tom@walsh-ops.example","Head office","active","Manager","34 min ago"],
+  ["Niamh Cronin","Trade counter","niamh@walsh-ops.example","Ballincollig","active","Standard","3 h ago"],
   ["Dermot Casey","Buyer · Casey Builders","dermot@caseybuilders.ie","—","external","External","2 days ago"],
   ["Liam Dunne","Owner · Dunne & Sons","liam@dunneandsons.ie","—","inactive","External","19 days ago"]
 ];
@@ -301,7 +330,7 @@ const ADMIN_CARDS = [
    blurb:"Who reports to whom, where they work and when.",
    tags:["3 locations","Europe/Dublin","EUR"],
    listLabel:"WHAT YOU CONTROL HERE",
-   rows:[["Company details","Kilbride Group"],["Departments","5"],["Teams","6"],["Locations","3"],
+   rows:[["Company details","Walsh Labour Operations"],["Departments","5"],["Teams","6"],["Locations","3"],
      ["Reporting lines","4"],["Working hours","08:00–17:30, Mon–Fri"],["Holidays","Irish public holidays"],
      ["Default currency and timezone","EUR · Europe/Dublin"]]},
 
@@ -392,7 +421,7 @@ const ADMIN_CARDS = [
    blurb:"Logo, accent colour, templates and how agents appear.",
    tags:["Lime accent","2 templates"],
    listLabel:"WHAT YOU CONTROL HERE",
-   rows:[["Company logo","kilbride-mark.svg"],["Pulse accent colour","oklch(0.86 0.19 118)"],
+   rows:[["Company logo","walsh-monogram-demo.svg"],["Pulse accent colour","oklch(0.86 0.19 118)"],
      ["Email templates","3"],["Document templates","2"],["Agent appearance","12 faces · 6 shells"],
      ["Customer-facing portal branding","on", true]]},
   {id:"appearance", group:"EXPERIENCE", title:"Appearance & themes", icon:"brand", tint:"#6ad0f0",
@@ -429,7 +458,7 @@ const DATA_EVENTS = [
 const PEOPLE_EVENTS = [
   ["Aoife approved a refund","€412 written off on INV-10233 after the parts dispute closed.","Aoife Nolan","Glanmire Mechanical","Pulse","completed"],
   ["Tom changed a booking","Thursday's depot visit moved to 11:00 to fit the delivery window.","Tom Walsh","Ballincollig depot","Pulse","completed"],
-  ["Mac assigned a task","Lease decision handed to himself, due Thursday.","Martin Kilbride","Ballincollig depot","Pulse","completed"],
+  ["Mac assigned a task","Lease decision handed to himself, due Thursday.","Paul Walsh","Ballincollig depot","Pulse","completed"],
   ["Finance uploaded a report","August month-end close workbook, nine sheets.","Aoife Nolan","Head office","Pulse","completed"],
   ["Niamh edited customer details","Billing email corrected so reminders stop bouncing.","Niamh Cronin","Dunne & Sons Ltd","Pulse","completed"],
   ["Séamus completed a visit","Warranty callback closed — parts ordered on the spot.","Séamus Byrne","Fitzgerald Heating","Pulse","completed"],
@@ -445,7 +474,7 @@ const AI_EVENTS = [
   ["Agent paused for approval","Chase email to Dunne & Sons drafted — needs your yes before it sends.","Finance Agent","Dunne & Sons Ltd","Agent","awaiting"],
   ["Workflow failed","Certificate renewal reminder could not find a contact for Mallow yard.","Operations","Mallow yard","Agent","failed"],
   ["Stock Watch raised order lines","Two lines below reorder point before Thursday's jobs.","Stock Watch","Munster Plumbing","Agent","working"],
-  ["Briefing Agent posted the morning brief","Two items needed you; the rest was noise.","Briefing Agent","Martin Kilbride","WhatsApp","completed"]
+  ["Briefing Agent posted the morning brief","Two items needed you; the rest was noise.","Briefing Agent","Paul Walsh","WhatsApp","completed"]
 ];
 
 const STREAM_DEFS = [
@@ -458,53 +487,58 @@ const STREAM_DEFS = [
 ];
 
 const NAV = [
+  {section:"COMMAND"},
   {label:"Home", icon:"helios", page:"Home"},
   {label:"Agents", icon:"navAgents", page:"Agents"},
   {label:"Dashboard", icon:"navDash", page:"Dashboard", dot:true},
+  {section:"DELIVERY"},
+  {label:"Operations", icon:"navOps", page:"Operations"},
+  {label:"Crew", icon:"navCrew", page:"Crew"},
+  {label:"Timesheets", icon:"navTime", page:"Timesheets", dot:true},
+  {label:"Compliance", icon:"navComp", page:"Compliance", dot:true},
+  {label:"Clients", icon:"navClients", page:"Clients"},
+  {label:"Finance", icon:"navFinance", page:"Finance"},
+  {section:"CONTROL"},
   {label:"Work", icon:"navWork", page:"Work"},
   {label:"Records", icon:"navRecords", page:"Records"},
-  {label:"Activity", icon:"pulseLine", page:"Activity", dot:true}
+  {label:"Activity", icon:"pulseLine", page:"Activity"}
 ];
 
 /* Inbox items follow the real InboxItem shape: what happened, why it matters, what I can do. */
 const ITEMS = {
-  po:{kind:"Approval", importance:"high", icon:ICONS.approvals, age:"18m",
-    title:"Purchase order PO-4471 — €14,280",
-    why:"Raised by Aoife Nolan. €4,280 above your sign-off threshold, so it routed to you.",
-    detail:"Both lines are below reorder point and committed to Thursday's jobs. Pricing matches the June supplier agreement. Approving writes the decision as you and fires core.approval.updated.",
-    actionLabel:"Approve", secondaryLabel:"Request changes", group:"Approvals",
-    fields:[{k:"Provider",v:"core.approvals"},{k:"Requested by",v:"Aoife Nolan"},{k:"Value",v:"€14,280"},{k:"Record",v:"PO-4471"}],
-    history:[{when:"Today 08:54",text:"Aoife Nolan raised the request"},{when:"Today 08:54",text:"Routed to Martin Kilbride — over threshold"}]},
-  sync:{kind:"Alert", importance:"critical", icon:ICONS.health, age:"6h",
-    title:"Xero sync failed — expired token",
-    why:"148 invoices have been queued since 02:14. Reconnecting posts them automatically.",
-    detail:"The refresh token was last authorised on 27 February. Third failure this year; moving the connection to the service account would stop it recurring. The dispatcher retried twice before dead-lettering.",
-    actionLabel:"Reconnect", secondaryLabel:"Snooze", group:"Alerts",
-    fields:[{k:"Provider",v:"core.notifications"},{k:"Integration",v:"Xero"},{k:"Queued",v:"148 invoices"},{k:"Event",v:"core.automation.failed"}],
-    history:[{when:"Today 02:14",text:"Sync failed — invalid_grant"},{when:"Today 02:16",text:"Retried twice, then dead-lettered"}]},
-  visit:{kind:"Task", importance:"high", icon:ICONS.visits, age:"2h",
-    title:"Site visit at Ballincollig depot is unassigned",
-    why:"Scheduled for tomorrow 09:00 with no installer against it.",
-    detail:"Contributed by the site-visits module through its own inbox provider. Core never learns what a visit is — it sorts by importance and age like everything else.",
-    actionLabel:"Assign installer", secondaryLabel:"Reschedule", group:"Work",
-    fields:[{k:"Provider",v:"site-visits.unassigned"},{k:"Entity",v:"site-visits.visit"},{k:"Scheduled",v:"Tomorrow 09:00"},{k:"Status",v:"scheduled"}],
-    history:[{when:"Yesterday 16:20",text:"Visit created by Tom Walsh"},{when:"Today 07:00",text:"Flagged unassigned by the briefing job"}]},
-  auto:{kind:"Alert", importance:"normal", icon:ICONS.autos, age:"3h",
-    title:"“Overdue reminder” skipped 4 contacts",
-    why:"Four organisations have no billing email, so the send step could not run.",
-    detail:"The automation ran at 08:00 and sent six of ten reminders. Each step is recorded in automation_run_steps with its input, output and error.",
-    actionLabel:"Fix the records", secondaryLabel:"Disable step", group:"Automations",
-    fields:[{k:"Automation",v:"Overdue invoice reminder"},{k:"Run",v:"partial"},{k:"Sent",v:"6 of 10"},{k:"Failed step",v:"notify.email"}],
-    history:[{when:"Today 08:00",text:"Run completed with warnings"},{when:"Yesterday 08:00",text:"Same 4 records skipped"}]},
-  task:{kind:"Task", importance:"normal", icon:ICONS.work, age:"Thu",
-    title:"Ballincollig lease renewal closes Thursday",
-    why:"No decision recorded against the contract and the notice period is 30 days.",
-    detail:"The lease runs to 31 October. Ballincollig carried 38% of counter revenue this year; rent is 4.1% of that.",
-    actionLabel:"Open record", secondaryLabel:"Assign", group:"Work",
-    fields:[{k:"Provider",v:"core.tasks"},{k:"Due",v:"Thu 27 Aug"},{k:"Assignee",v:"Martin Kilbride"},{k:"Priority",v:"high"}],
-    history:[{when:"18 Aug",text:"Task materialised from a recurring rule"},{when:"2 Feb",text:"Contract uploaded by Aoife Nolan"}]}
+  ts:{kind:"Approval", importance:"high", icon:ICONS.navTime, age:"Fri",
+    title:"TS-1098 · 8h · €320 awaiting client sign-off",
+    why:"David Byrne, Ballymun, Fri 13 Nov. Held off the Morrow draft.",
+    detail:"Part of the 590h, not extra to it. Signing releases €320 to invoicing.",
+    actionLabel:"Open", secondaryLabel:"Later", group:"Approvals",
+    fields:[{k:"Sheet",v:"TS-1098"},{k:"Hours",v:"8h"},{k:"Value",v:"€320"},{k:"Site",v:"Ballymun"}],
+    history:[{when:"Fri 16:05",text:"Submitted by David Byrne"},{when:"Mon 08:20",text:"Elaine re-requested sign-off"}]},
+  sean:{kind:"Alert", importance:"critical", icon:ICONS.navComp, age:"2d",
+    title:"Sean Murphy not cleared for North Quay",
+    why:"Manual-handling record expired 14 Nov (demo site policy).",
+    detail:"Assigned but not approved for site entry. Mark Dunne available as cover.",
+    actionLabel:"Open", secondaryLabel:"Later", group:"Alerts",
+    fields:[{k:"Worker",v:"Sean Murphy"},{k:"Site",v:"North Quay"},{k:"Expired",v:"14 Nov"}],
+    history:[{when:"Mon 06:30",text:"Flagged by Compliance Monitor"}]},
+  debt:{kind:"Approval", importance:"high", icon:ICONS.navFinance, age:"31d",
+    title:"INV-2026-103 · €7,760 · 31 days overdue",
+    why:"Westbridge Civil. Reminder drafted, waiting for you.",
+    detail:"Week 37 invoice. Separate from this week's draft.",
+    actionLabel:"Open", secondaryLabel:"Later", group:"Approvals",
+    fields:[{k:"Invoice",v:"INV-2026-103"},{k:"Amount",v:"€7,760"}],
+    history:[{when:"Mon 09:30",text:"Reminder drafted by Collections Assistant"}]},
+  safepass:{kind:"Task", importance:"normal", icon:ICONS.navComp, age:"4d",
+    title:"Patrick Doyle's Safe Pass expires 20 Nov",
+    why:"Still valid. Renewal reminder drafted.",
+    detail:"Harbour Road Upgrade.", actionLabel:"Open", secondaryLabel:"Later", group:"Work",
+    fields:[{k:"Worker",v:"Patrick Doyle"}], history:[{when:"Mon 06:31",text:"Reminder drafted"}]},
+  roster:{kind:"Task", importance:"normal", icon:ICONS.navOps, age:"Fri",
+    title:"REQ-204 · Castleview roster request",
+    why:"Updated North Quay roster waiting for your approval.",
+    detail:"Mock portal request.", actionLabel:"Open", secondaryLabel:"Later", group:"Work",
+    fields:[{k:"Request",v:"REQ-204"}], history:[{when:"Fri 14:10",text:"Raised by Castleview (mock)"}]}
 };
-const ORDER = ["sync","po","visit","auto","task"];
+const ORDER = ["ts","sean","debt","safepass","roster"];
 
 const ANSWERS = {
   credit:{tool:"core_search", effect:"read",
@@ -622,7 +656,7 @@ const TEAMS = [
   ["Accounts","3 members","Aoife Nolan","core:approval:decide"],
   ["Installers","9 members","Séamus Byrne","core:task:update"],
   ["Trade counter","6 members","Niamh Cronin","core:person:view"],
-  ["Management","2 members","Martin Kilbride","all core permissions"]
+  ["Management","2 members","Paul Walsh","all core permissions"]
 ];
 const LOCATIONS = [
   ["Head office","Little Island, Cork","14 staff","active"],
@@ -631,77 +665,90 @@ const LOCATIONS = [
 ];
 
 const AGENT_DEFS = [
-  {id:"close", name:"Month-end close", shape:"rim-capsule", tint:"#1b2430", state:"working", group:true,
-   members:["credit","briefing","ops"], role:"Credit Control, Briefing and Ops Watchdog working the same close",
-   when:"09:12", preview:"credit control: three accounts still open.",
+  {id:"close", name:"Week 46 close", shape:"rim-capsule", tint:"#1b2430", state:"working", group:true,
+   members:["invoice","collector","collections"], role:"Invoice Builder, Timesheet Collector and Collections Assistant on the same Monday close",
+   when:"08:15", preview:"invoice builder: €23,270 drafted, €320 held.",
    thread:[
-     {kind:"stamp", text:"Today 09:04"},
-     {kind:"routine", text:"Ran routine", routine:"Month-end close"},
-     {kind:"agent", from:"credit", text:"three accounts are still open on the August ledger. Dunne & Sons is the only one that changed behaviour rather than just running late."},
-     {kind:"agent", from:"ops", text:"nothing technical is holding it up — the Xero token is back and all 148 queued invoices posted at 09:02."},
-     {kind:"agent", from:"briefing", text:"so the close is one decision, not three: what to do about Dunne. everything else reconciles."},
-     {kind:"user", text:"instalments, two payments to end of september"},
-     {kind:"agent", from:"credit", text:"drafted on those terms and parked it. sending is a write tool, so it waits for your yes."},
-     {kind:"agent", from:"briefing", text:"once that goes, August closes. i'll put the confirmation in tomorrow's briefing."}
+     {kind:"stamp", text:"Mon 16 Nov 08:00"},
+     {kind:"routine", text:"Ran routine", routine:"Weekly invoice close"},
+     {kind:"agent", from:"collector", text:"590h across 16 sheets for 9–15 Nov. one duplicate row from the Westbridge import (TS-1097) rejected. 582h signed off, 8h waiting on Morrow."},
+     {kind:"agent", from:"invoice", text:"four drafts built from signed-off hours only: Castleview €8,190, Westbridge €7,760, Morrow €4,280, Cedarline €3,040. €23,270 in total. TS-1098 (€320) held off the Morrow draft."},
+     {kind:"agent", from:"collections", text:"separately, INV-2026-103 for Westbridge (week 37, €7,760) is 31 days overdue. reminder drafted, not sent."},
+     {kind:"user", text:"hold the drafts until Morrow signs, I'll look at the reminder"},
+     {kind:"agent", from:"invoice", text:"drafts stay drafts. nothing is issued until Elaine or you approve."},
+     {kind:"agent", from:"collections", text:"reminder is in Work › Approvals for you. this demo never sends email."}
    ]},
-  {id:"briefing", name:"Briefing", shape:"crown-pebble", tint:"#191c1f", state:"complete", role:"Reads the whole business every morning and tells you the two things that matter",
-   when:"08:02", preview:"three things moved overnight. two need you.",
+  {id:"briefing", name:"Briefing", shape:"crown-pebble", tint:"#191c1f", state:"complete", role:"07:00 management summary: what moved, what needs a decision, in euros",
+   when:"07:00", preview:"582 of 590 hours signed off. four things need you.",
    thread:[
-     {kind:"stamp", text:"Today 08:00"},
+     {kind:"stamp", text:"Mon 16 Nov 07:00"},
      {kind:"routine", text:"Ran routine", routine:"Morning briefing"},
-     {kind:"agent", text:"morning briefing:", lines:[
-       {k:"Cash", v:"€41.2k past 60 days · Dunne & Sons is 74 days"},
-       {k:"Work", v:"11 tasks late · 7 of them at Ballincollig"},
-       {k:"Approvals", v:"PO-4471 sitting with you since 08:54"}]},
-     {kind:"agent", text:"two things need you today: the purchase order, and a yes/no on the Ballincollig lease. everything else is covered."},
-     {kind:"user", text:"put the lease on Thursday"},
-     {kind:"agent", text:"done — task created against Ballincollig depot, due Thursday, assigned to you. i'll remind you Wednesday afternoon."}
+     {kind:"agent", text:"morning, paul. week 46 (9–15 Nov):", lines:[
+       {k:"Hours", v:"582 of 590 signed off · 8h (€320) held at Ballymun, TS-1098"},
+       {k:"Site", v:"Sean Murphy not cleared for North Quay · manual handling expired 14 Nov"},
+       {k:"Cash", v:"INV-2026-103 · Westbridge Civil · €7,760 · 31 days overdue"},
+       {k:"Growth", v:"+2 contractors at €43/€29 for 4 weeks = +€4,480 contribution"}]},
+     {kind:"agent", text:"gross contribution last week was €6,490 on €23,590 billing (27.51%), before overhead, VAT and tax."},
+     {kind:"user", text:"who covers Sean"},
+     {kind:"agent", text:"Mark Dunne: available from tomorrow, North Quay induction current, same trade. Ops Watchdog has it as a suggestion; the roster doesn't change until you say so."}
    ]},
-  {id:"credit", name:"Credit Control", shape:"executive-capsule", tint:"#2a2118", state:"waiting", role:"Watches payment behaviour and drafts the chase before you ask",
-   when:"Yesterday", preview:"three drafts parked. nothing sent.",
+  {id:"ops", name:"Ops Watchdog", shape:"shield", tint:"#2b1b1e", state:"attention", role:"Site clearance, unallocated worker gaps and overdue timesheet approvals",
+   when:"07:30", preview:"sean's expired doc clashes with tomorrow's north quay roster.",
    thread:[
-     {kind:"stamp", text:"Yesterday 16:40"},
-     {kind:"agent", text:"three accounts changed behaviour this week. i've drafted a chase for each and parked them — sending is a write tool, so they wait for you."},
-     {kind:"user", text:"what changed on dunne"},
-     {kind:"agent", text:"days-to-pay went 12 → 74 since May while order volume held steady. that pattern is a cash problem, not a dispute. i'd offer two instalments to 30 September before putting them on stop again."}
+     {kind:"stamp", text:"Mon 16 Nov 07:30"},
+     {kind:"agent", text:"Sean Murphy is rostered for North Quay tomorrow but the manual-handling record expired on 14 Nov. North Quay's site policy (demo) needs it current, so Sean is on hold."},
+     {kind:"agent", text:"suggested cover: Mark Dunne (available, inducted, general operative). this is a suggestion, not a change."},
+     {kind:"agent", text:"also: TS-1098 has been waiting on client sign-off since Fri 16:05. Elaine re-requested it at 08:20."}
    ]},
-  {id:"visits", name:"Visit Scout", shape:"low-dome", tint:"#241b2e", state:"working", role:"Keeps the site-visit board honest and chases unassigned work",
-   when:"Yesterday", preview:"thursday's depot check still has nobody on it.",
+  {id:"collector", name:"Timesheet Collector", shape:"low-dome", tint:"#241b2e", state:"complete", role:"Reminds missing submissions, validates hours, catches duplicates. Never certifies attendance",
+   when:"08:00", preview:"590h validated. 1 duplicate rejected.",
    thread:[
-     {kind:"stamp", text:"Yesterday 07:00"},
-     {kind:"agent", text:"four visits booked this week, one unassigned: Thursday 09:00 depot stock check. Séamus is the only installer free that morning."},
-     {kind:"user", text:"give it to séamus"},
-     {kind:"agent", text:"assigned. the module fired site-visits.visit.updated and the escalation automation stood down."}
+     {kind:"stamp", text:"Mon 16 Nov 08:00"},
+     {kind:"agent", text:"validated 16 sheets, 590h. TS-1097 matched TS-1089 (Ryan McGrath, Wed 11 Nov, 8h) and was rejected, €0 impact."},
+     {kind:"agent", text:"two notes, no action needed: Adrian Nowak 42h (client signed the extra 2h), Oisín Kavanagh 35h (short Friday, foreman note)."}
    ]},
-  {id:"stock", name:"Stock Watch", shape:"control-cube", tint:"#16241f", state:"thinking", role:"Reorder points, supplier lead times and what Thursday's jobs actually need",
-   when:"Mon", preview:"two lines below reorder point before thursday.",
+  {id:"invoice", name:"Invoice Builder", shape:"control-cube", tint:"#16241f", state:"waiting", role:"Drafts weekly client invoices from signed-off hours only",
+   when:"08:15", preview:"4 drafts, €23,270. holding €320.",
    thread:[
-     {kind:"stamp", text:"Monday 11:20"},
-     {kind:"agent", text:"two lines drop below reorder point before Thursday's jobs. Munster can cover both at the June agreement price — that's what PO-4471 is."}
+     {kind:"stamp", text:"Mon 16 Nov 08:15"},
+     {kind:"agent", text:"4 drafts for week 46 totalling €23,270. Morrow is €4,280, not €4,600, because TS-1098 (8h × €40) isn't signed."},
+     {kind:"agent", text:"drafts only. they finalise when Elaine or you approve them in Work › Approvals."}
    ]},
-  {id:"ops", name:"Ops Watchdog", shape:"shield", tint:"#2b1b1e", state:"attention", role:"Sits on the event queue and tells you when something stopped working",
-   when:"02:16", preview:"xero token expired. 148 invoices queued, nothing lost.",
+  {id:"compliance", name:"Compliance Monitor", shape:"executive-capsule", tint:"#2a2118", state:"waiting", role:"Safe Pass, manual handling and site inductions against each site's rules",
+   when:"06:30", preview:"1 expired, 2 expiring within 30 days.",
    thread:[
-     {kind:"stamp", text:"Today 02:16"},
-     {kind:"agent", text:"the Xero connection failed at 02:14 — invalid_grant, token last authorised 27 February. 148 invoices are queued and post on reconnect. third time this year; move it to the service account."}
+     {kind:"stamp", text:"Mon 16 Nov 06:30"},
+     {kind:"agent", text:"daily scan of 17 workers:", lines:[
+       {k:"Expired", v:"Sean Murphy · manual handling · 14 Nov (North Quay requires it)"},
+       {k:"Expiring", v:"Patrick Doyle · Safe Pass · 20 Nov"},
+       {k:"Expiring", v:"Conor O'Reilly · Westbridge induction · 2 Dec"}]},
+     {kind:"agent", text:"reminders drafted for review. a person signs off every document; i don't verify anything with issuers."}
    ]},
-  {id:"counter", name:"Counter Assistant", shape:"offset-pebble", tint:"#191c1f", state:"working", role:"Answers trade-counter questions on price, stock and account status",
-   when:"Fri", preview:"14 questions answered, 2 handed to niamh.",
+  {id:"margin", name:"Margin Analyst", shape:"offset-pebble", tint:"#191c1f", state:"working", role:"Rate mismatches, low-margin sites, hiring and rate scenarios",
+   when:"09:00", preview:"+2 contractors = +€4,480 over 4 weeks.",
    thread:[
-     {kind:"stamp", text:"Friday 17:30"},
-     {kind:"agent", text:"14 counter questions answered this week. two went to Niamh: both were credit-limit calls, which i won't make on my own."}
+     {kind:"stamp", text:"Mon 16 Nov 09:00"},
+     {kind:"agent", text:"two more contractors, 40h a week for 4 weeks, at €43 / €29: +320h, +€13,760 revenue, +€9,280 cost, +€4,480 gross contribution."},
+     {kind:"agent", text:"Ballymun is the thinnest site at 22.5% (€40 charge, €31 cost). a €2/h rise across the current crew would cost €1,180 a week and take weekly contribution from €6,490 to €5,310."}
+   ]},
+  {id:"collections", name:"Collections Assistant", shape:"executive-capsule", tint:"#2a2118", state:"waiting", role:"Prepares overdue-invoice reminders for human review",
+   when:"09:30", preview:"INV-2026-103 reminder drafted. nothing sent.",
+   thread:[
+     {kind:"stamp", text:"Mon 16 Nov 09:30"},
+     {kind:"agent", text:"INV-2026-103, Westbridge Civil, €7,760, due 16 Oct, 31 days overdue. no reply from their accounts since 2 Oct."},
+     {kind:"agent", text:"drafted a polite second reminder. it waits for your approval and this demo never sends it."}
    ]}
 ];
 
 const KPI_DEFS = {
-  revenue:{label:"Revenue", value:"€412,800", delta:"+6.2%", dir:"up", hint:"30 days", hero:true},
-  cash:{label:"Cash collected", value:"€368,140", delta:"+4.1%", dir:"up", hint:"30 days"},
-  overdue:{label:"Overdue debt", value:"€41,200", delta:"+€8,410", dir:"down", hint:"60 days+"},
-  margin:{label:"Gross margin", value:"31.4%", delta:"−0.6pt", dir:"down", hint:"vs last month"},
-  jobs:{label:"Jobs completed", value:"126", delta:"+4", dir:"up", hint:"30 days"},
-  nps:{label:"Repeat rate", value:"68%", delta:"+3pt", dir:"up", hint:"customers ordering again"},
-  pipeline:{label:"Open pipeline", value:"€212,400", delta:"+11%", dir:"up", hint:"quoted, not won"},
-  utilisation:{label:"Installer hours", value:"84%", delta:"−2pt", dir:"down", hint:"billable share"}
+  revenue:{label:"Potential billings", value:"€23,590", delta:"590h submitted", dir:"up", hint:"wk 46 · ex VAT", hero:true},
+  cash:{label:"Invoice-ready", get value(){ return WALSH_LIVE.ready(); }, get delta(){ return WALSH_LIVE.held(); }, get dir(){ return WALSH_LIVE.heldDir(); }, hint:"signed-off hours"},
+  overdue:{label:"Overdue", value:"€7,760", delta:"INV-2026-103 · 31 days", dir:"down", hint:"Westbridge Civil"},
+  margin:{label:"Contribution margin", value:"27.51%", delta:"€6,490 gross", dir:"up", hint:"before overhead, VAT, tax"},
+  jobs:{label:"Crew cleared", get value(){ return WALSH_LIVE.cleared(); }, get delta(){ return WALSH_LIVE.heldText(); }, get dir(){ return WALSH_LIVE.clearedDir(); }, hint:"allocated workers"},
+  nps:{label:"Subcontractors", value:"17", delta:"15 placed · 2 free", dir:"up", hint:"on the books"},
+  pipeline:{label:"Gross contribution", value:"€6,490", delta:"€17,100 contractor cost", dir:"up", hint:"wk 46"},
+  utilisation:{label:"Hours approved", get value(){ return WALSH_LIVE.approved(); }, delta:"of 590h", dir:"up", hint:"wk 46"}
 };
 
 const ASPECT_DEFS = [
@@ -986,14 +1033,14 @@ const FACE_TINTS = [
 
 /* ---- ontology graph: generation, Dijkstra traversal, canvas render ---- */
 const CLUSTERS = [
-  ["Organisations", "#c8f04b", 0.00, 0.62, 46],
-  ["People",        "#6ad0f0", 0.90, 0.70, 52],
-  ["Files",         "#b06cf0", 1.75, 0.66, 58],
-  ["Tasks",         "#f0c04b", 2.55, 0.72, 44],
-  ["Invoices",      "#f0567f", 3.35, 0.60, 38],
-  ["Site visits",   "#5fe0a8", 4.15, 0.70, 40],
-  ["Locations",     "#f0803a", 4.95, 0.64, 30],
-  ["Approvals",     "#5f7cf0", 5.65, 0.72, 34]
+  ["Clients",      "#c99659", 0.00, 0.62, 30],
+  ["Contracts",    "#7f9bb8", 0.90, 0.70, 34],
+  ["Sites",        "#45b8a7", 1.75, 0.66, 40],
+  ["Workers",      "#9fc7e6", 2.55, 0.72, 52],
+  ["Timesheets",   "#d49a48", 3.35, 0.60, 58],
+  ["Invoices",     "#df7272", 4.15, 0.70, 40],
+  ["Certificates", "#b8a0e0", 4.95, 0.64, 46],
+  ["Tasks",        "#c8d0dc", 5.65, 0.72, 34]
 ];
 
 function mulberry(seed){

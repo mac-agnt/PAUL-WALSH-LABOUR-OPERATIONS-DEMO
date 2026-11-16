@@ -4,13 +4,9 @@ import AgentFace from "../components/AgentFace";
 import NavThumb from "../components/NavThumb";
 import DashboardKpiBand from "./pages/DashboardKpiBand";
 import Home from "./pages/Home";
-import Work from "./pages/Work";
 import Records from "./pages/Records";
 import RecordsFiles from "./pages/RecordsFiles";
 import RecordsOntology from "./pages/RecordsOntology";
-import Activity from "./pages/Activity";
-import Settings from "./pages/Settings";
-import Dashboard from "./pages/Dashboard";
 import Agents from "./pages/Agents";
 import HeliosMini from "./overlays/HeliosMini";
 import WorkViewer from "./overlays/WorkViewer";
@@ -18,6 +14,8 @@ import AgentStudio from "./overlays/AgentStudio";
 import NewRecordDialog from "./overlays/NewRecordDialog";
 import CommandPalette from "./overlays/CommandPalette";
 import BackgroundGallery from "./overlays/BackgroundGallery";
+import ModuleRouter from "./walsh/ModuleRouter";
+import { DemoRailCard, DemoToast, EntityDrawer } from "./walsh/ShellExtras";
 
 type Props = { v: any };
 
@@ -28,18 +26,19 @@ export default function AppShell({ v }: Props) {
       <div style={{"position":"absolute","width":"1px","height":"1px","overflow":"hidden","opacity":"0","pointerEvents":"none"}}>
         <AgentFace shape={"crown-pebble"} state={"idle"} tint={"#191c1f"} size={"1"} />
       </div>
+      {v.mobileNavOpen && <div onClick={v.closeMobileNav} style={{"position":"fixed","inset":"0","zIndex":"75","background":"var(--scrim)","backdropFilter":"blur(3px)"}} />}
       <nav data-rail-nav="1" style={css(v.railOuter)}>
         <span style={css(v.railThumbStyle)} />
         <div style={css(cat(v.railRowStyle, "margin-bottom:22px"))}>
           <button className={cx("ix0", "ix1")} onClick={v.toggleRail} title={v.railLabel} style={{"width":"36px","height":"36px","flex":"none","border":"0","borderRadius":"var(--cta-r,11px)","background":"var(--accent-fill,var(--accent))","color":"var(--on-accent)","boxShadow":"var(--accent-glow,none)","cursor":"pointer","display":"flex","alignItems":"center","justifyContent":"center","fontSize":"13px","fontWeight":"600","padding":"0","transition":"transform .2s var(--ease)"}}>
-            {"K"}
+            {"W"}
           </button>
           <span style={css(v.brandStyle)}>
-            <span style={{"display":"block","fontSize":"15px","fontWeight":"600","letterSpacing":"-.3px","color":"var(--ink)"}}>
-              {"Kilbride Group"}
+            <span style={{"display":"block","fontSize":"14px","fontWeight":"600","letterSpacing":"-.3px","color":"var(--ink)","whiteSpace":"nowrap","overflow":"hidden","textOverflow":"ellipsis"}}>
+              {"Walsh Operations"}
             </span>
             <span style={{"display":"block","marginTop":"2px","fontSize":"9px","fontWeight":"500","letterSpacing":".16em","color":"var(--accent)"}}>
-              {"PULSE · OPERATIONS"}
+              {"PULSE · LABOUR OPS"}
             </span>
           </span>
           {v.railOpen && (
@@ -54,6 +53,9 @@ export default function AppShell({ v }: Props) {
         </div>
         {arr(v.nav).map((item: any, i0: number) => (
           <Fragment key={i0}>
+            {item?.isSection && (
+              <div className="wl-rail-sec">{item?.label}</div>
+            )}
             {item?.isDivider && (
               <>
                 <div style={{"width":"20px","height":"1px","background":"var(--track)","margin":"7px 0"}} />
@@ -88,22 +90,23 @@ export default function AppShell({ v }: Props) {
           </Fragment>
         ))}
         <div style={{"flex":"1","minHeight":"10px"}} />
+        <DemoRailCard open={!!v.railOpen} />
         {v.railOpen && (
           <>
-            <div style={{"margin":"6px 4px 4px","padding":"18px 18px 16px","background":"var(--surface)","border":"1px solid var(--border)","borderRadius":"18px"}}>
+            <div style={{"margin":"6px 4px 4px","padding":"14px 16px 12px","background":"var(--surface)","border":"1px solid var(--border)","borderRadius":"18px"}}>
               <div style={{"fontSize":"11px","fontWeight":"600","letterSpacing":".12em","color":"var(--faint)"}}>
-                {"SIGNED IN"}
+                {"SIGNED IN · DEMO"}
               </div>
               <div style={{"display":"flex","alignItems":"center","gap":"11px","marginTop":"12px"}}>
                 <div style={{"width":"40px","height":"40px","flex":"none","borderRadius":"999px","background":"var(--accent-soft)","color":"var(--accent)","display":"flex","alignItems":"center","justifyContent":"center","fontSize":"13px","fontWeight":"600"}}>
-                  {"MK"}
+                  {"PW"}
                 </div>
                 <div style={{"minWidth":"0"}}>
                   <div style={{"fontSize":"17px","fontWeight":"600","letterSpacing":"-.3px","color":"var(--ink)","whiteSpace":"nowrap","overflow":"hidden","textOverflow":"ellipsis"}}>
-                    {"Martin Kilbride"}
+                    {"Paul Walsh"}
                   </div>
                   <div style={{"fontSize":"12.5px","color":"var(--faint)","marginTop":"2px","whiteSpace":"nowrap","overflow":"hidden","textOverflow":"ellipsis"}}>
-                    {"Kilbride Group · Owner"}
+                    {"Owner / operator"}
                   </div>
                 </div>
               </div>
@@ -143,14 +146,14 @@ export default function AppShell({ v }: Props) {
             </button>
             <div style={css(cat(v.railRowStyle, "margin-top:10px;padding:12px 10px;border-top:1px solid var(--border)"))}>
               <div style={{"width":"40px","height":"40px","flex":"none","borderRadius":"12px","background":"var(--surface-2)","border":"1px solid var(--border)","color":"var(--body)","display":"flex","alignItems":"center","justifyContent":"center","fontSize":"12px","fontWeight":"600","cursor":"pointer"}}>
-                {"MK"}
+                {"PW"}
               </div>
               <span style={css(v.brandStyle)}>
                 <span style={{"display":"block","fontSize":"14px","fontWeight":"500","color":"var(--ink)"}}>
-                  {"Martin Kilbride"}
+                  {"Paul Walsh"}
                 </span>
                 <span style={{"display":"block","marginTop":"2px","fontSize":"12px","color":"var(--faint)"}}>
-                  {"Kilbride Group · Owner"}
+                  {"Owner / operator"}
                 </span>
               </span>
             </div>
@@ -165,7 +168,7 @@ export default function AppShell({ v }: Props) {
           {txt(v.hoverLabel?.hint)}
         </span>
       </span>
-      <main style={css(cat("--page-dy:", v.pageDy, ";position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;margin:16px 16px 16px 0;background:var(--panel,#0f1316);border:1px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,.03) inset"))}>
+      <main data-wl-main="1" style={css(cat("--page-dy:", v.pageDy, ";position:relative;z-index:1;flex:1;min-width:0;display:flex;flex-direction:column;margin:16px 16px 16px 0;background:var(--panel,#0f1316);border:1px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 1px 0 rgba(255,255,255,.03) inset"))}>
         {"\n"}
         {txt(v.pageSweepEl)}
         {"\n"}
@@ -176,7 +179,12 @@ export default function AppShell({ v }: Props) {
         )}
         <div style={{"position":"absolute","left":"0","right":"0","bottom":"0","height":"64px","zIndex":"3","pointerEvents":"none","maskImage":"linear-gradient(0deg,#000 0%,transparent 100%)","WebkitMaskImage":"linear-gradient(0deg,#000 0%,transparent 100%)","background":"linear-gradient(0deg,var(--bg) 0%,rgba(0,0,0,0) 100%)","opacity":".85"}} />
         <div style={css(v.headerFieldStyle)} />
-        <header style={{"position":"relative","zIndex":"4","flex":"none","width":"100%","padding":"18px 28px","boxSizing":"border-box","borderBottom":"1px solid var(--border)"}}>
+        <header data-wl-header="1" style={{"position":"relative","zIndex":"4","flex":"none","width":"100%","padding":"18px 28px","boxSizing":"border-box","borderBottom":"1px solid var(--border)"}}>
+          {v.isMobile && (
+            <button className="wl-btn ghost" onClick={v.openMobileNav} aria-label="Open navigation" style={{"position":"absolute","left":"10px","top":"50%","transform":"translateY(-50%)","width":"40px","padding":"0","zIndex":"5"}}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 6h16 M4 12h16 M4 18h16" /></svg>
+            </button>
+          )}
           <div style={css(v.headerPillStyle)}>
             {v.isAgents && (
               <>
@@ -311,7 +319,7 @@ export default function AppShell({ v }: Props) {
                         <>
                           <div style={{"minWidth":"0"}}>
                             <div style={{"fontSize":"12px","fontWeight":"500","lineHeight":"1.2","whiteSpace":"nowrap"}}>
-                              {"Martin Kilbride"}
+                              {"Paul Walsh"}
                             </div>
                             <div style={{"fontSize":"10.5px","color":"var(--faint)","lineHeight":"1.2"}}>
                               {"Owner"}
@@ -389,11 +397,11 @@ export default function AppShell({ v }: Props) {
         {v.isDashboard && <DashboardKpiBand v={v} />}
         <div data-scroll-main="1" style={{"flex":"1","minHeight":"0","overflowY":"auto","overflowX":"hidden","scrollbarWidth":"none"}}>
           {v.isChat && <Home v={v} />}
-          {v.isWork && <Work v={v} />}
+          {v.isModule && <ModuleRouter v={v} />}
           {v.isRecords && <Records v={v} />}
           {v.rec?.isContacts && (
             <>
-              <div style={{"display":"flex","flexDirection":"column","gap":"14px"}}>
+              <div className="wl-hscroll" style={{"display":"flex","flexDirection":"column","gap":"14px"}}>
                 <div style={{"background":"var(--records-card)","border":"1px solid var(--border)","borderRadius":"var(--card-r,18px)","backdropFilter":"blur(20px)","boxShadow":"0 24px 60px rgba(0,0,0,.34)","overflow":"hidden"}}>
                   <div style={{"display":"flex","alignItems":"flex-start","gap":"14px","padding":"20px 24px 18px"}}>
                     <div style={{"flex":"1","minWidth":"0"}}>
@@ -469,9 +477,10 @@ export default function AppShell({ v }: Props) {
               </div>
             </>
           )}
-          {v.rec?.isFiles && <RecordsFiles v={v} />}
+          {v.rec?.isFiles && <div className="wl-hscroll"><RecordsFiles v={v} /></div>}
           {v.rec?.isOntology && <RecordsOntology v={v} />}
-          {v.isActivity && <Activity v={v} />}
+          {v.rec?.extra && <ModuleRouter v={v} />}
+
           {v.act?.detailOpen && (
             <>
               <div onClick={v.act?.closeDetail} style={{"position":"fixed","inset":"0","zIndex":"68","background":"var(--scrim)","backdropFilter":"blur(6px)","display":"flex","justifyContent":"flex-end"}}>
@@ -575,9 +584,8 @@ export default function AppShell({ v }: Props) {
               </div>
             </>
           )}
-          {v.isSettings && <Settings v={v} />}
-          {v.isDashboard && <Dashboard v={v} />}
-          {v.isAgents && <Agents v={v} />}
+          {v.isAgents && v.agentsTab === "directory" && <div className="wl-agents-dir" style={{"height":"100%"}}><Agents v={v} /></div>}
+          {v.isAgents && v.agentsTab !== "directory" && <ModuleRouter v={v} />}
         </div>
       </main>
       {v.showFab && (
@@ -818,6 +826,8 @@ export default function AppShell({ v }: Props) {
         </>
       )}
       {v.newRec?.open && <NewRecordDialog v={v} />}
+      <EntityDrawer />
+      <DemoToast />
       {v.paletteOpen && <CommandPalette v={v} />}
       {v.bgGallery?.open && <BackgroundGallery v={v} />}
     </div>
